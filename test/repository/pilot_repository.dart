@@ -15,16 +15,6 @@ class PilotRepository extends FaunaRepository<Pilot> {
     throw UnimplementedError();
   }
 
-  @override
-  Pilot fromJson(Map<String, dynamic> model) {
-    return Pilot(model['id'] as String, model['name'] as String);
-  }
-
-  @override
-  Future<Optional<Pilot>> remove(String id, Function deserialize) {
-    // TODO: implement remove
-    throw UnimplementedError();
-  }
 
 
 }

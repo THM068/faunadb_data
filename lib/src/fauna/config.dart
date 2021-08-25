@@ -1,3 +1,5 @@
+import 'package:faunadb_http/faunadb_http.dart';
+
 final String APP_KEY = 'app.key';
 final String CURRENT_USER_KEY = 'current.user.key';
 final String AUTHENTICATED_USER_KEY = 'authenticated.user.key';
@@ -27,3 +29,6 @@ String getAuthenticatedDbKey() => getFaunaDbConfig()[AUTHENTICATED_USER_KEY];
 void setAuthenticatedDbKey(String key) {
   FAUNADB_DATA_KEY_MAP[AUTHENTICATED_USER_KEY] = key;
 }
+
+FaunaClient getFaunaClient() => FaunaClient(FaunaConfig.build(secret: getCurrentUserDbKey()));
+

@@ -42,5 +42,9 @@ import 'repository/pilot_repository.dart';
       expect(result.id, equals(id));
     });
 
+    test("can remove a pilot",(){
+
+    });
+
 
   }

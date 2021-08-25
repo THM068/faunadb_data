@@ -15,11 +15,8 @@ abstract class FaunaRepository<T extends Entity> implements Repository<T>, Ident
 
   FaunaRepository(this.collection, this.all_items_index);
 
-  FaunaClient _client() => FaunaClient(FaunaConfig.build(secret: getCurrentUserDbKey()));
+  FaunaClient _client() => getFaunaClient();
 
-  FaunaClient getClient() => _client();
-
-  T fromJson(Map<String, dynamic> model);
 
   @override
   Future<Optional<String>> nextId() async {
@@ -47,7 +44,7 @@ abstract class FaunaRepository<T extends Entity> implements Repository<T>, Ident
         T t =   deserialize(resource['data'].object);
         return Optional.of(t);
       }
-      throw FaunaDbException('Resource not found for id $id');
+      return Optional.empty();
     }
     catch(e) {
       print(e);
@@ -71,6 +68,27 @@ abstract class FaunaRepository<T extends Entity> implements Repository<T>, Ident
     }
     catch(e) {
       throw FaunaDbException("Failed to save object to the database $e");
+    }
+    finally {
+      client.close();
+    }
+  }
+
+  Future<Optional<T>> remove(String id, Function deserialize) async {
+    final FaunaClient client = _client();
+
+    try {
+      var faunaResponse = await client.query(Delete(Ref(Collection(collection),id)) );
+      Map<String,dynamic> data = faunaResponse.toJson();
+      final resource = data["resource"];
+      if(resource != null) {
+        T t =  deserialize(resource["data"].object);
+        return Optional.of(t);
+      }
+      throw FaunaDbException('Resource not found for id $id');
+    }
+    catch(e) {
+      throw FaunaDbException('Error occured : reason $e');
     }
     finally {
       client.close();
