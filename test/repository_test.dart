@@ -1,17 +1,22 @@
 
 import 'package:faunadb_data/faunadb_data.dart';
+import 'package:faunadb_http/query.dart';
 import 'package:optional/optional.dart';
 import 'package:test/test.dart';
 
 import 'model/pilot.dart';
+import 'model/space_ship.dart';
 import 'repository/pilot_repository.dart';
+import 'repository/space_ship_repository.dart';
 
   void main() {
     late PilotRepository pilotRepository;
+    late SpaceShipRepository spaceshipRepository;
 
     setUp(() {
       setCurrentUserDbKey("fnAERYcfGSACSWqCqp1Ss_VflovuFLka-ke-CnNe");
       pilotRepository = new PilotRepository();
+      spaceshipRepository = new SpaceShipRepository();
     });
 
     test("repository can create a new Id",() async {
@@ -42,8 +47,17 @@ import 'repository/pilot_repository.dart';
       expect(result.id, equals(id));
     });
 
-    test("can remove a pilot",(){
+    test("can save a spaceship that reference a pilot",() async {
+      Optional<String> optionalId = await pilotRepository.nextId();
+      Ref pilotRef = Ref(Collection("Spaceships"), "269789402020971013");
 
+      SpaceShip spaceShip = new SpaceShip(optionalId.value, "Lightning Rod", pilotRef);
+
+      SpaceShip resultSpaceShip = await spaceshipRepository.save(spaceShip, getSpaceFromJson);
+
+      expect(resultSpaceShip.id, equals(optionalId.value));
+      expect(resultSpaceShip.name, equals("Lightning Rod"));
+      expect(resultSpaceShip.pilot.id, equals(pilotRef.id));
     });
 
 

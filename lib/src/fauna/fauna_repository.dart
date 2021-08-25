@@ -106,5 +106,32 @@ abstract class FaunaRepository<T extends Entity> implements Repository<T>, Ident
 
 
 
+  Paginate _paginate(PaginationOptions po) {
+    if(_isOptionHasValue(po.size) && _isOptionHasValue(po.before)) {
+      int? size = po.size?.value;
+      Object before = Ref(Collection(collection), po.before?.value);
+      return Paginate(Match(Index(this.all_items_index)), size: size, before: before );
+    }
+    else if(_isOptionHasValue(po.size) && _isOptionHasValue(po.after)) {
+      int? size = po.size?.value;
+      Object after = Ref(Collection(collection), po.after?.value);
+      return Paginate(Match(Index(this.all_items_index)), size: size, after: after );
+    }
+    else if(_isOptionHasValue(po.size) && !_isOptionHasValue(po.before) && !_isOptionHasValue(po.after)){
+      int? size = po.size?.value;
+      return Paginate(Match(Index(this.all_items_index)), size: size );
+    }
+    else {
+      return Paginate(Match(Match(Index(this.all_items_index))));
+    }
+  }
+
+  bool _isNull(Object? ob) {
+    return ob == null;
+  }
+
+  bool _isOptionHasValue(Object? ob) {
+    return !_isNull(ob) && (ob as Optional).isPresent;
+  }
 
 }

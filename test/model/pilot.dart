@@ -24,6 +24,10 @@ class Pilot extends Entity<Pilot> {
     };
     return model;
   }
+
+  static String collection() => "Pilots";
+
+  static String allPilotsIndex() => "all_pilots";
 }
 
 Pilot getPilotFromJson(Map<String, dynamic> json) {
