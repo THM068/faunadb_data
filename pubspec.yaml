@@ -1,6 +1,6 @@
 name: faunadb_data
-description: A starting point for Dart libraries or applications.
-version: 0.0.5
+description: This is a simple library that gives you CRUD operations for FAUNA.
+version: 0.0.6
 homepage: https://github.com/THM068/faunadb_data
 
 environment:
