@@ -1,5 +1,6 @@
 
 import 'package:faunadb_data/faunadb_data.dart';
+import 'package:faunadb_http/faunadb_http.dart';
 import 'package:faunadb_http/query.dart';
 import 'package:optional/optional.dart';
 import 'package:test/test.dart';
@@ -58,6 +59,16 @@ import 'repository/space_ship_repository.dart';
       expect(resultSpaceShip.id, equals(optionalId.value));
       expect(resultSpaceShip.name, equals("Lightning Rod"));
       expect(resultSpaceShip.pilot.id, equals(pilotRef.id));
+    });
+
+    test("can get all pilots",() async {
+      PaginationOptions po = PaginationOptions(size: Optional.of(2));
+
+      Page result  = await pilotRepository.findAll(po, getPilotFromJson);
+      print(result.after);
+      print(result.before);
+      print(result.data);
+      expect(result.data, isNotNull);
     });
 
 

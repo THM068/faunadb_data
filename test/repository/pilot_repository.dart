@@ -8,12 +8,4 @@ import '../model/pilot.dart';
 class PilotRepository extends FaunaRepository<Pilot> {
   PilotRepository() : super(Pilot.collection(), Pilot.allPilotsIndex());
 
-  @override
-  Future<Page> findAll(PaginationOptions po, Function deserialize) {
-    // TODO: implement findAll
-    throw UnimplementedError();
-  }
-
-
-
 }

@@ -61,28 +61,29 @@ abstract class FaunaRepository<T extends Entity> implements Repository<T>, Ident
     try {
       final faunaResponse = await client.query(saveQuery(entity.getId() ,
                           Obj(entity.model())) );
-      Map<String,dynamic> data = faunaResponse.toJson();
-      final resource = data["resource"];
-      T t =  deserialize(resource["data"].object);
+      var data = faunaResponse.toJson();
+      final resource = data['resource'];
+      T t =  deserialize(resource['data'].object);
       return t;
     }
     catch(e) {
-      throw FaunaDbException("Failed to save object to the database $e");
+      throw FaunaDbException('Failed to save object to the database $e');
     }
     finally {
       client.close();
     }
   }
 
+  @override
   Future<Optional<T>> remove(String id, Function deserialize) async {
-    final FaunaClient client = _client();
+    final client = _client();
 
     try {
       var faunaResponse = await client.query(Delete(Ref(Collection(collection),id)) );
-      Map<String,dynamic> data = faunaResponse.toJson();
-      final resource = data["resource"];
+      var data = faunaResponse.toJson();
+      final resource = data['resource'];
       if(resource != null) {
-        T t =  deserialize(resource["data"].object);
+        T t =  deserialize(resource['data'].object);
         return Optional.of(t);
       }
       throw FaunaDbException('Resource not found for id $id');
@@ -98,31 +99,60 @@ abstract class FaunaRepository<T extends Entity> implements Repository<T>, Ident
   Expr saveQuery(String id, Expr data) {
     Expr query =If(
         Exists(Ref(Collection(collection), id)),
-        Replace(Ref(Collection(collection), id), Obj({"data": data})),
-        Create(Ref(Collection(collection), id), Obj({"data": data}))
+        Replace(Ref(Collection(collection), id), Obj({'data': data})),
+        Create(Ref(Collection(collection), id), Obj({'data': data}))
     );
     return query;
   }
 
-
+  @override
+  Future<Page> findAll(PaginationOptions po, Function deserialize) async {
+    final client = _client();
+    try {
+      final paginate = _paginate(po);
+      final faunaResponse = await client.query(Map_(
+          paginate,
+          Lambda('nextRef', Select('data', Get(Var('nextRef'))))
+      ));
+      final data = faunaResponse.toJson();
+      final resource = data['resource'];
+x      var listResult = List<T>.empty(growable: true);
+      if(resource != null) {
+        List dataObjects = resource['data'];
+        for(var item in dataObjects) {
+          T t =  deserialize(item.object);
+          listResult.add(t);
+        }
+      }
+      var after = (resource['after']?.length == null ) ? CursorType.EMPTY : resource['after']?.length > 0 ? resource['after'][0] : CursorType.EMPTY;
+      var before = (resource['before']?.length == null ) ? CursorType.EMPTY : resource['before']?.length > 0 ? resource['before'][0] : CursorType.EMPTY;
+      return Page(before, after, listResult);
+    }
+    catch(e) {
+        throw FaunaDbException('An error has occurred $e');
+    }
+    finally {
+      client.close();
+    }
+  }
 
   Paginate _paginate(PaginationOptions po) {
     if(_isOptionHasValue(po.size) && _isOptionHasValue(po.before)) {
-      int? size = po.size?.value;
+      var size = po.size?.value;
       Object before = Ref(Collection(collection), po.before?.value);
-      return Paginate(Match(Index(this.all_items_index)), size: size, before: before );
+      return Paginate(Match(Index(all_items_index)), size: size, before: before );
     }
     else if(_isOptionHasValue(po.size) && _isOptionHasValue(po.after)) {
-      int? size = po.size?.value;
+      var size = po.size?.value;
       Object after = Ref(Collection(collection), po.after?.value);
-      return Paginate(Match(Index(this.all_items_index)), size: size, after: after );
+      return Paginate(Match(Index(all_items_index)), size: size, after: after );
     }
     else if(_isOptionHasValue(po.size) && !_isOptionHasValue(po.before) && !_isOptionHasValue(po.after)){
-      int? size = po.size?.value;
-      return Paginate(Match(Index(this.all_items_index)), size: size );
+      var size = po.size?.value;
+      return Paginate(Match(Index(all_items_index)), size: size );
     }
     else {
-      return Paginate(Match(Match(Index(this.all_items_index))));
+      return Paginate(Match(Match(Index(all_items_index))));
     }
   }
 
