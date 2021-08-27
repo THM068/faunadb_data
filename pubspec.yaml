@@ -1,7 +1,7 @@
 name: faunadb_data
 description: A starting point for Dart libraries or applications.
-version: 1.0.0
-# homepage: https://www.example.com
+version: 0.0.5
+homepage: https://github.com/THM068/faunadb_data
 
 environment:
   sdk: '>=2.12.0 <3.0.0'
