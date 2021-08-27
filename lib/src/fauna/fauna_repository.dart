@@ -116,7 +116,7 @@ abstract class FaunaRepository<T extends Entity> implements Repository<T>, Ident
       ));
       final data = faunaResponse.toJson();
       final resource = data['resource'];
-x      var listResult = List<T>.empty(growable: true);
+      var listResult = List<T>.empty(growable: true);
       if(resource != null) {
         List dataObjects = resource['data'];
         for(var item in dataObjects) {
